@@ -35,6 +35,11 @@ export interface TopScorer {
   photo?: string;
 }
 
+export interface PlayersPage {
+  items: Player[];
+  total: number;
+}
+
 export interface FilterState {
   season: number | null;
   leagueId: number | null;

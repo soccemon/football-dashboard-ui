@@ -125,8 +125,11 @@
     </div>
 
     <mat-paginator
+      [length]="total()"
       [pageSize]="25"
       [pageSizeOptions]="[25, 50, 100]"
+      [pageIndex]="pageIndex()"
+      (page)="onPage($event)"
       showFirstLastButtons
     ></mat-paginator>
   </div>

@@ -31,6 +31,9 @@
       [players]="filteredPlayers()"
       [loading]="loadingPlayers()"
       [emptyMessage]="emptyMessage()"
+      [total]="totalPlayers()"
+      [pageIndex]="currentPage()"
+      (pageChange)="onPageChange($event)"
     />
   </section>
 </div>

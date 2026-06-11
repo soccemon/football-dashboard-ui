@@ -1,8 +1,8 @@
-import { Component, ViewChild, AfterViewInit, effect, input } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, effect, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { Player } from '../../models/models';
@@ -25,6 +25,9 @@ export class PlayerTableComponent implements AfterViewInit {
   players = input<Player[]>([]);
   loading = input<boolean>(false);
   emptyMessage = input<string>('No players found.');
+  total = input<number>(0);
+  pageIndex = input<number>(0);
+  pageChange = output<PageEvent>();
 
   readonly displayedColumns = [
     'photo', 'name', 'nationality', 'position', 'age',
@@ -34,19 +37,20 @@ export class PlayerTableComponent implements AfterViewInit {
 
   dataSource = new MatTableDataSource<Player>([]);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor() {
     effect(() => {
       this.dataSource.data = this.players();
-      this.paginator?.firstPage();
     });
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  onPage(event: PageEvent): void {
+    this.pageChange.emit(event);
   }
 
   onImgError(event: Event): void {

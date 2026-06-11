@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { PageEvent } from '@angular/material/paginator';
 import { ApiService } from '../../services/api.service';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar';
 import { KpiRowComponent } from '../../components/kpi-row/kpi-row';
@@ -26,6 +27,9 @@ export class DashboardComponent {
   filterState = signal<FilterState>({ season: null, leagueId: null, teamId: null, position: 'All' });
   allPlayers = signal<Player[]>([]);
   topScorers = signal<TopScorer[]>([]);
+  totalPlayers = signal(0);
+  currentPage = signal(0);
+  currentPageSize = signal(25);
   loadingPlayers = signal(false);
   loadingTopScorers = signal(false);
   playerError = signal<string | null>(null);
@@ -57,24 +61,39 @@ export class DashboardComponent {
       this.prevApiKey = '';
       this.allPlayers.set([]);
       this.topScorers.set([]);
+      this.totalPlayers.set(0);
+      this.currentPage.set(0);
       return;
     }
 
     if (changed) {
       this.prevApiKey = apiKey;
-      this.fetchPlayers(filter);
+      this.currentPage.set(0);
+      this.currentPageSize.set(25);
+      this.fetchPlayers(filter, 0, 25);
       this.fetchTopScorers(filter);
     }
   }
 
-  private fetchPlayers(filter: FilterState): void {
+  onPageChange(event: PageEvent): void {
+    this.currentPage.set(event.pageIndex);
+    this.currentPageSize.set(event.pageSize);
+    this.fetchPlayers(this.filterState(), event.pageIndex, event.pageSize);
+  }
+
+  private fetchPlayers(filter: FilterState, pageIndex = 0, pageSize = 25): void {
     this.loadingPlayers.set(true);
     this.playerError.set(null);
-    this.api.getPlayers(filter.leagueId!, filter.season!, filter.teamId ?? undefined).subscribe({
-      next: players => { this.allPlayers.set(players); this.loadingPlayers.set(false); },
+    this.api.getPlayers(filter.leagueId!, filter.season!, filter.teamId ?? undefined, pageIndex + 1, pageSize).subscribe({
+      next: response => {
+        this.allPlayers.set(response.items);
+        this.totalPlayers.set(response.total);
+        this.loadingPlayers.set(false);
+      },
       error: () => {
         this.playerError.set('Failed to load player data. Please check your connection and try again.');
         this.allPlayers.set([]);
+        this.totalPlayers.set(0);
         this.loadingPlayers.set(false);
       },
     });
