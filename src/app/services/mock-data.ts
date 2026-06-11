@@ -88,7 +88,7 @@ const barca: Player[] = [
   { id: 69, name: 'J. Cancelo',       nationality: 'Portugal',    position: 'DEF', age: 30, appearances: 28, goals: 2,  assists: 5,  rating: 7.18, pass_accuracy: 85, yellow_cards: 4, red_cards: 0, team: 'Barcelona' },
 ];
 
-// Real API response data — page 1 of 3 for Inter, season 2024
+// Real API response — page 1 of 3 for Inter, season 2024 (pages 2-3 not available during rate-limit testing)
 const inter: Player[] = [
   { id: 161859, name: 'G. Oristanio',    nationality: 'Italy',       position: 'MID', age: 23, photo: 'https://media.api-sports.io/football/players/161859.png', appearances: null, goals: null, assists: null, rating: null,   pass_accuracy: null, yellow_cards: null, red_cards: null, team: 'Inter' },
   { id: 322626, name: 'M. Zanotti',      nationality: 'Italy',       position: 'DEF', age: 22, photo: 'https://media.api-sports.io/football/players/322626.png', appearances: null, goals: null, assists: null, rating: null,   pass_accuracy: null, yellow_cards: null, red_cards: null, team: 'Inter' },
@@ -120,6 +120,7 @@ const PLAYER_MAP: Record<number, Player[]> = {
   505: inter,
 };
 
+// Small page size so even the modest mock datasets produce multiple pages, exercising the forkJoin pagination path
 const MOCK_PAGE_SIZE = 7;
 
 export function getMockPlayersPage(teamId: number, page: number = 1): PlayersPage {

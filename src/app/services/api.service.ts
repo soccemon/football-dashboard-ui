@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import { League, Team, Player, PlayersPage, TopScorer } from '../models/models';
 import { MOCK_LEAGUES, MOCK_TEAMS, getMockPlayersPage, getMockTopScorers } from './mock-data';
 
+// API returns full English position names; map to the 2-4 char codes used throughout the UI
 const POSITION_MAP: Record<string, string> = {
   Goalkeeper: 'GK',
   Defender: 'DEF',
@@ -19,6 +20,7 @@ export class ApiService {
   private http = inject(HttpClient);
   private base = environment.apiUrl;
 
+  // When true every method returns mock data; toggled by the demo mode banner
   readonly mockMode = signal(false);
 
   getLeagues(): Observable<League[]> {
@@ -96,7 +98,7 @@ function normalizePlayer(p: RawPlayer): Player {
     appearances: p.appearances,
     goals: p.goals,
     assists: p.assists,
-    rating: p.rating != null ? parseFloat(String(p.rating)) : null,
+    rating: p.rating != null ? parseFloat(String(p.rating)) : null, // API returns rating as a string e.g. "7.218181"
     pass_accuracy: p.passes_accuracy,
     yellow_cards: p.yellow_cards,
     red_cards: p.red_cards,

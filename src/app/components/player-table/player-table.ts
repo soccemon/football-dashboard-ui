@@ -34,6 +34,7 @@ export class PlayerTableComponent implements AfterViewInit {
 
   dataSource = new MatTableDataSource<Player>([]);
 
+  // Numeric weights so position sort goes GK → DEF → MID → FWD ascending
   private static readonly POSITION_ORDER: Record<string, number> = { GK: 0, DEF: 1, MID: 2, FWD: 3 };
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -55,7 +56,7 @@ export class PlayerTableComponent implements AfterViewInit {
         return PlayerTableComponent.POSITION_ORDER[player.position] ?? 99;
       }
       const val = (player as any)[column];
-      return val ?? -Infinity;
+      return val ?? -Infinity; // null stats sink to the bottom regardless of sort direction
     };
   }
 

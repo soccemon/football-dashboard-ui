@@ -7,6 +7,7 @@ import { ApiService } from '../../services/api.service';
 import { League, Team, FilterState } from '../../models/models';
 import { forkJoin, of } from 'rxjs';
 
+// OnPush + plain arrays: Angular 22 signals inside mat-select throw NG0900; plain arrays + markForCheck() is the fix
 @Component({
   selector: 'app-filter-bar',
   standalone: true,
@@ -38,6 +39,7 @@ export class FilterBarComponent implements OnInit {
   private teamLeagueMap: Record<number, number> = {};
 
   constructor() {
+    // Re-run whenever mockMode flips so switching demo on/off reloads the league list
     effect(() => {
       this.api.mockMode();
       this.clearFilters();
@@ -130,7 +132,7 @@ export class FilterBarComponent implements OnInit {
         this.teams = merged;
         this.loadingTeams = false;
         this.cdr.markForCheck();
-        this.emit();
+        this.emit(); // lets dashboard fetch all-team players without requiring the user to pick a team
       },
       error: err => {
         this.teams = [];

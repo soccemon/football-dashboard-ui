@@ -56,6 +56,7 @@ export class DashboardComponent {
     return 'No players found for the selected filters.';
   });
 
+  // Deduplicates fetches: position-only filter changes update filterState but must not re-fetch from the API
   private prevApiKey = '';
 
   mockMode = this.api.mockMode;
@@ -72,6 +73,7 @@ export class DashboardComponent {
   }
 
   onFilterChange(filter: FilterState): void {
+    // No specific team selected → treat as "all teams in the league"
     const effectiveTeamIds = filter.teamIds.length > 0
       ? filter.teamIds
       : filter.availableTeams.map(t => t.id);
