@@ -3,34 +3,45 @@
   <mat-form-field appearance="outline" class="filter-field">
     <mat-label>Season</mat-label>
     <mat-select [value]="selectedSeason" (selectionChange)="onSeasonChange($event.value)">
-      <mat-option *ngFor="let s of seasons" [value]="s">{{ s }}</mat-option>
+      @for (s of seasons; track s) {
+        <mat-option [value]="s">{{ s }}</mat-option>
+      }
     </mat-select>
   </mat-form-field>
 
-  <!-- League -->
+  <!-- League (multi-select) -->
   <mat-form-field appearance="outline" class="filter-field">
     <mat-label>League</mat-label>
     <mat-select
-      [value]="selectedLeagueId"
+      multiple
+      [value]="selectedLeagueIds"
       [disabled]="!selectedSeason"
       (selectionChange)="onLeagueChange($event.value)"
     >
-      <mat-option *ngIf="loadingLeagues" disabled>Loading leagues…</mat-option>
-      <mat-option *ngFor="let league of leagues" [value]="league.id">{{ league.name }}</mat-option>
+      @if (loadingLeagues) {
+        <mat-option disabled>Loading leagues…</mat-option>
+      }
+      @for (league of leagues; track league.id) {
+        <mat-option [value]="league.id">{{ league.name }}</mat-option>
+      }
     </mat-select>
   </mat-form-field>
 
-  <!-- Team -->
+  <!-- Team (multi-select) -->
   <mat-form-field appearance="outline" class="filter-field">
     <mat-label>Team</mat-label>
     <mat-select
-      [value]="selectedTeamId"
-      [disabled]="!selectedLeagueId"
+      multiple
+      [value]="selectedTeamIds"
+      [disabled]="!selectedLeagueIds.length"
       (selectionChange)="onTeamChange($event.value)"
     >
-      <mat-option [value]="null">All Teams</mat-option>
-      <mat-option *ngIf="loadingTeams" disabled>Loading teams…</mat-option>
-      <mat-option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</mat-option>
+      @if (loadingTeams) {
+        <mat-option disabled>Loading teams…</mat-option>
+      }
+      @for (team of teams; track team.id) {
+        <mat-option [value]="team.id">{{ team.name }}</mat-option>
+      }
     </mat-select>
   </mat-form-field>
 
@@ -38,7 +49,16 @@
   <mat-form-field appearance="outline" class="filter-field">
     <mat-label>Position</mat-label>
     <mat-select [value]="selectedPosition" (selectionChange)="onPositionChange($event.value)">
-      <mat-option *ngFor="let pos of positions" [value]="pos">{{ pos }}</mat-option>
+      @for (pos of positions; track pos) {
+        <mat-option [value]="pos">{{ pos }}</mat-option>
+      }
     </mat-select>
   </mat-form-field>
+
+  @if (hasActiveFilters()) {
+    <button mat-stroked-button class="clear-btn" (click)="clearFilters()">
+      <mat-icon>close</mat-icon>
+      Clear
+    </button>
+  }
 </div>

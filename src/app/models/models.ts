@@ -18,31 +18,33 @@ export interface Player {
   nationality?: string;
   position: string;
   age: number;
-  appearances: number;
-  goals: number;
-  assists: number;
-  rating: number;
-  pass_accuracy?: number;
-  yellow_cards: number;
-  red_cards: number;
+  appearances: number | null;
+  goals: number | null;
+  assists: number | null;
+  rating: number | null;
+  pass_accuracy?: number | null;
+  yellow_cards: number | null;
+  red_cards: number | null;
   team?: string;
 }
 
 export interface TopScorer {
   name: string;
-  club: string;
+  team: string;
   goals: number;
   photo?: string;
 }
 
 export interface PlayersPage {
   items: Player[];
-  total: number;
+  totalPages: number;
 }
 
 export interface FilterState {
   season: number | null;
-  leagueId: number | null;
-  teamId: number | null;
+  leagueIds: number[];
+  teamIds: number[];
+  teamLeagueMap: Record<number, number>;
+  availableTeams: Team[];
   position: string;
 }

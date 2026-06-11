@@ -8,4 +8,24 @@
     min-width: 160px;
     flex: 1 1 160px;
   }
+
+  .clear-btn {
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 1px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 12px;
+
+    .filter-field {
+      min-width: 0;
+      flex: 1 1 calc(50% - 6px);
+    }
+
+    .clear-btn {
+      width: 100%;
+      margin-bottom: 0;
+    }
+  }
 }

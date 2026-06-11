@@ -1,8 +1,32 @@
 <div class="dashboard">
   <!-- Filter Bar -->
   <section class="section filter-section">
-    <app-filter-bar (filterChange)="onFilterChange($event)" />
+    <app-filter-bar (filterChange)="onFilterChange($event)" (apiError)="onApiError($event)" />
   </section>
+
+  <!-- API Limit Banner -->
+  @if (apiLimitMessage()) {
+    <div class="error-banner api-limit-banner">
+      <mat-icon>warning</mat-icon>
+      <div class="api-limit-content">
+        <span><strong>API call limit reached.</strong> {{ apiLimitMessage() }}</span>
+        <button mat-stroked-button class="demo-btn" (click)="enableDemoMode()">
+          <mat-icon>science</mat-icon>
+          Try Demo Mode
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (mockMode()) {
+    <div class="demo-banner">
+      <mat-icon>science</mat-icon>
+      <span>Demo Mode — using sample data</span>
+      <button mat-icon-button (click)="mockMode.set(false)" matTooltip="Exit demo mode">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
 
   <!-- Error Banner -->
   @if (playerError()) {
@@ -20,7 +44,7 @@
     <div class="scorers-col">
       <app-top-scorers
         [topScorers]="topScorers()"
-        [loading]="loadingTopScorers()"
+        [loading]="loadingPlayers()"
       />
     </div>
   </section>
@@ -31,9 +55,6 @@
       [players]="filteredPlayers()"
       [loading]="loadingPlayers()"
       [emptyMessage]="emptyMessage()"
-      [total]="totalPlayers()"
-      [pageIndex]="currentPage()"
-      (pageChange)="onPageChange($event)"
     />
   </section>
 </div>

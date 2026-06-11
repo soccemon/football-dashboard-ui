@@ -1,12 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { PageEvent } from '@angular/material/paginator';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { forkJoin, of, switchMap } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar';
 import { KpiRowComponent } from '../../components/kpi-row/kpi-row';
 import { PlayerTableComponent } from '../../components/player-table/player-table';
 import { TopScorersComponent } from '../../components/top-scorers/top-scorers';
-import { FilterState, Player, TopScorer } from '../../models/models';
+import { FilterState, Player } from '../../models/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,6 +20,8 @@ import { FilterState, Player, TopScorer } from '../../models/models';
     PlayerTableComponent,
     TopScorersComponent,
     MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -24,15 +29,11 @@ import { FilterState, Player, TopScorer } from '../../models/models';
 export class DashboardComponent {
   private api = inject(ApiService);
 
-  filterState = signal<FilterState>({ season: null, leagueId: null, teamId: null, position: 'All' });
+  filterState = signal<FilterState>({ season: null, leagueIds: [], teamIds: [], teamLeagueMap: {}, availableTeams: [], position: 'All' });
   allPlayers = signal<Player[]>([]);
-  topScorers = signal<TopScorer[]>([]);
-  totalPlayers = signal(0);
-  currentPage = signal(0);
-  currentPageSize = signal(25);
   loadingPlayers = signal(false);
-  loadingTopScorers = signal(false);
   playerError = signal<string | null>(null);
+  apiLimitMessage = signal<string | null>(null);
 
   filteredPlayers = computed(() => {
     const { position } = this.filterState();
@@ -40,70 +41,101 @@ export class DashboardComponent {
     return position === 'All' ? players : players.filter(p => p.position === position);
   });
 
-  hasLeagueAndSeason = computed(() => {
-    const { leagueId, season } = this.filterState();
-    return !!(leagueId && season);
-  });
-
-  emptyMessage = computed(() =>
-    this.hasLeagueAndSeason() ? 'No players found for the selected filters.' : 'Select a season and league to get started.',
+  topScorers = computed(() =>
+    [...this.allPlayers()]
+      .filter(p => p.goals != null && p.goals > 0)
+      .sort((a, b) => (b.goals ?? 0) - (a.goals ?? 0))
+      .slice(0, 5)
+      .map(p => ({ name: p.name, team: p.team ?? '', goals: p.goals ?? 0, photo: p.photo }))
   );
+
+  emptyMessage = computed(() => {
+    const { season, leagueIds } = this.filterState();
+    if (!season) return 'Select a season to get started.';
+    if (!leagueIds.length) return 'Select a league to continue.';
+    return 'No players found for the selected filters.';
+  });
 
   private prevApiKey = '';
 
+  mockMode = this.api.mockMode;
+
+  onApiError(msg: string): void {
+    this.apiLimitMessage.set(msg);
+  }
+
+  enableDemoMode(): void {
+    this.api.mockMode.set(true);
+    this.apiLimitMessage.set(null);
+    this.prevApiKey = '';
+    this.allPlayers.set([]);
+  }
+
   onFilterChange(filter: FilterState): void {
-    const apiKey = `${filter.leagueId}-${filter.season}-${filter.teamId}`;
+    const effectiveTeamIds = filter.teamIds.length > 0
+      ? filter.teamIds
+      : filter.availableTeams.map(t => t.id);
+
+    const apiKey = `${filter.leagueIds.join(',')}-${filter.season}-${[...effectiveTeamIds].sort().join(',')}`;
     const changed = apiKey !== this.prevApiKey;
 
     this.filterState.set(filter);
 
-    if (!filter.leagueId || !filter.season) {
+    if (!filter.leagueIds.length || !filter.season) {
       this.prevApiKey = '';
       this.allPlayers.set([]);
-      this.topScorers.set([]);
-      this.totalPlayers.set(0);
-      this.currentPage.set(0);
       return;
     }
 
     if (changed) {
       this.prevApiKey = apiKey;
-      this.currentPage.set(0);
-      this.currentPageSize.set(25);
-      this.fetchPlayers(filter, 0, 25);
-      this.fetchTopScorers(filter);
+
+      if (effectiveTeamIds.length) {
+        this.fetchPlayers(filter, effectiveTeamIds);
+      } else {
+        this.allPlayers.set([]);
+      }
     }
   }
 
-  onPageChange(event: PageEvent): void {
-    this.currentPage.set(event.pageIndex);
-    this.currentPageSize.set(event.pageSize);
-    this.fetchPlayers(this.filterState(), event.pageIndex, event.pageSize);
-  }
-
-  private fetchPlayers(filter: FilterState, pageIndex = 0, pageSize = 25): void {
+  private fetchPlayers(filter: FilterState, effectiveTeamIds: number[]): void {
     this.loadingPlayers.set(true);
     this.playerError.set(null);
-    this.api.getPlayers(filter.leagueId!, filter.season!, filter.teamId ?? undefined, pageIndex + 1, pageSize).subscribe({
-      next: response => {
-        this.allPlayers.set(response.items);
-        this.totalPlayers.set(response.total);
-        this.loadingPlayers.set(false);
-      },
-      error: () => {
-        this.playerError.set('Failed to load player data. Please check your connection and try again.');
-        this.allPlayers.set([]);
-        this.totalPlayers.set(0);
-        this.loadingPlayers.set(false);
-      },
-    });
-  }
 
-  private fetchTopScorers(filter: FilterState): void {
-    this.loadingTopScorers.set(true);
-    this.api.getTopScorers(filter.leagueId!, filter.season!).subscribe({
-      next: scorers => { this.topScorers.set(scorers.slice(0, 5)); this.loadingTopScorers.set(false); },
-      error: () => { this.topScorers.set([]); this.loadingTopScorers.set(false); },
+    const teamRequests = effectiveTeamIds.map(teamId => {
+      const leagueId = filter.teamLeagueMap[teamId] ?? filter.leagueIds[0];
+      return this.api.getPlayers(leagueId, filter.season!, teamId, 1).pipe(
+        switchMap(firstPage => {
+          if (firstPage.totalPages <= 1) return of([firstPage]);
+          const rest = Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
+            this.api.getPlayers(leagueId, filter.season!, teamId, i + 2)
+          );
+          return forkJoin([of(firstPage), ...rest]);
+        }),
+        map(pages => pages.flatMap(p => p.items))
+      );
+    });
+
+    forkJoin(teamRequests).subscribe({
+      next: results => {
+        this.allPlayers.set(results.flat());
+        this.loadingPlayers.set(false);
+      },
+      error: err => {
+        const limit = apiLimitMessage(err);
+        if (limit) this.apiLimitMessage.set(limit);
+        else this.playerError.set('Failed to load player data. Please check your connection and try again.');
+        this.allPlayers.set([]);
+        this.loadingPlayers.set(false);
+      },
     });
   }
+}
+
+function apiLimitMessage(err: any): string | null {
+  const detail: unknown = err?.error?.detail;
+  if (typeof detail === 'string' && detail.toLowerCase().includes('request limit')) {
+    return 'You have reached the API request limit for the day. Please try again tomorrow.';
+  }
+  return null;
 }

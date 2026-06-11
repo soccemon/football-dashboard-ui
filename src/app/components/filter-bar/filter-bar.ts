@@ -1,15 +1,17 @@
-import { Component, OnInit, inject, output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, output, effect, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { NgFor, NgIf } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../services/api.service';
 import { League, Team, FilterState } from '../../models/models';
+import { forkJoin, of } from 'rxjs';
 
 @Component({
   selector: 'app-filter-bar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatSelectModule, MatFormFieldModule, NgFor, NgIf],
+  imports: [MatSelectModule, MatFormFieldModule, MatButtonModule, MatIconModule],
   templateUrl: './filter-bar.html',
   styleUrl: './filter-bar.scss',
 })
@@ -18,6 +20,7 @@ export class FilterBarComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   filterChange = output<FilterState>();
+  apiError = output<string>();
 
   readonly seasons = [2024, 2023, 2022];
   readonly positions = ['All', 'GK', 'DEF', 'MID', 'FWD'];
@@ -28,40 +31,66 @@ export class FilterBarComponent implements OnInit {
   loadingTeams = false;
 
   selectedSeason: number | null = null;
-  selectedLeagueId: number | null = null;
-  selectedTeamId: number | null = null;
+  selectedLeagueIds: number[] = [];
+  selectedTeamIds: number[] = [];
   selectedPosition = 'All';
 
-  ngOnInit(): void {
-    this.loadLeagues();
+  private teamLeagueMap: Record<number, number> = {};
+
+  constructor() {
+    effect(() => {
+      this.api.mockMode();
+      this.clearFilters();
+      this.loadLeagues();
+    });
   }
+
+  ngOnInit(): void {}
 
   onSeasonChange(season: number): void {
     this.selectedSeason = season;
-    this.selectedLeagueId = null;
-    this.selectedTeamId = null;
+    this.selectedLeagueIds = [];
+    this.selectedTeamIds = [];
     this.teams = [];
+    this.teamLeagueMap = {};
     this.emit();
   }
 
-  onLeagueChange(leagueId: number): void {
-    this.selectedLeagueId = leagueId;
-    this.selectedTeamId = null;
+  onLeagueChange(leagueIds: number[]): void {
+    this.selectedLeagueIds = leagueIds;
+    this.selectedTeamIds = [];
     this.teams = [];
-    if (leagueId && this.selectedSeason) {
-      this.loadTeams(leagueId, this.selectedSeason);
+    this.teamLeagueMap = {};
+
+    if (leagueIds.length && this.selectedSeason) {
+      this.loadTeams(leagueIds, this.selectedSeason);
     }
     this.emit();
   }
 
-  onTeamChange(teamId: number | null): void {
-    this.selectedTeamId = teamId;
+  onTeamChange(teamIds: number[]): void {
+    this.selectedTeamIds = teamIds;
     this.emit();
   }
 
   onPositionChange(position: string): void {
     this.selectedPosition = position;
     this.emit();
+  }
+
+  clearFilters(): void {
+    this.selectedSeason = null;
+    this.selectedLeagueIds = [];
+    this.selectedTeamIds = [];
+    this.selectedPosition = 'All';
+    this.teams = [];
+    this.teamLeagueMap = {};
+    this.cdr.markForCheck();
+    this.emit();
+  }
+
+  hasActiveFilters(): boolean {
+    return this.selectedSeason !== null || this.selectedLeagueIds.length > 0 || this.selectedPosition !== 'All';
   }
 
   private loadLeagues(): void {
@@ -73,27 +102,42 @@ export class FilterBarComponent implements OnInit {
         this.loadingLeagues = false;
         this.cdr.markForCheck();
       },
-      error: () => {
+      error: err => {
         this.leagues = [];
         this.loadingLeagues = false;
         this.cdr.markForCheck();
+        const msg = apiLimitMessage(err);
+        if (msg) this.apiError.emit(msg);
       },
     });
   }
 
-  private loadTeams(leagueId: number, season: number): void {
+  private loadTeams(leagueIds: number[], season: number): void {
     this.loadingTeams = true;
     this.cdr.markForCheck();
-    this.api.getTeams(leagueId, season).subscribe({
-      next: data => {
-        this.teams = Array.isArray(data) ? data : [];
+    const requests = leagueIds.map(id => this.api.getTeams(id, season));
+    forkJoin(requests.length ? requests : [of([])]).subscribe({
+      next: results => {
+        const map: Record<number, number> = {};
+        const merged: Team[] = [];
+        results.forEach((teamList, idx) => {
+          teamList.forEach(team => {
+            map[team.id] = leagueIds[idx];
+            merged.push(team);
+          });
+        });
+        this.teamLeagueMap = map;
+        this.teams = merged;
         this.loadingTeams = false;
         this.cdr.markForCheck();
+        this.emit();
       },
-      error: () => {
+      error: err => {
         this.teams = [];
         this.loadingTeams = false;
         this.cdr.markForCheck();
+        const msg = apiLimitMessage(err);
+        if (msg) this.apiError.emit(msg);
       },
     });
   }
@@ -101,9 +145,19 @@ export class FilterBarComponent implements OnInit {
   private emit(): void {
     this.filterChange.emit({
       season: this.selectedSeason,
-      leagueId: this.selectedLeagueId,
-      teamId: this.selectedTeamId,
+      leagueIds: this.selectedLeagueIds,
+      teamIds: this.selectedTeamIds,
+      teamLeagueMap: { ...this.teamLeagueMap },
+      availableTeams: [...this.teams],
       position: this.selectedPosition,
     });
   }
+}
+
+function apiLimitMessage(err: any): string | null {
+  const detail: unknown = err?.error?.detail;
+  if (typeof detail === 'string' && detail.toLowerCase().includes('request limit')) {
+    return 'You have reached the API request limit for the day. Please try again tomorrow.';
+  }
+  return null;
 }

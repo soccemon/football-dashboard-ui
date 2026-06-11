@@ -26,7 +26,7 @@ export class KpiRowComponent {
   });
 
   avgRating = computed(() => {
-    const ps = this.players().filter(p => p.rating > 0);
-    return ps.length ? ps.reduce((s, p) => s + p.rating, 0) / ps.length : 0;
+    const ps = this.players().filter(p => p.rating != null && p.rating > 0);
+    return ps.length ? ps.reduce((s, p) => s + p.rating!, 0) / ps.length : 0;
   });
 }
