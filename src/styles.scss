@@ -1,0 +1,113 @@
+@use '@angular/material' as mat;
+
+// ─── Custom Scout palette (rose/pink tones) ──────────────────────────────────
+html {
+  height: 100%;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$rose-palette,
+        tertiary: mat.$red-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+// ─── Light mode CSS variables (default) ──────────────────────────────────────
+:root {
+  --scout-bg: #f4f5f7;
+  --scout-surface: #ffffff;
+  --scout-text: #1a202c;
+  --scout-text-muted: #718096;
+  --scout-pink: #E8829A;
+  --scout-pink-light: #F2A7BB;
+  --scout-border: #e2e8f0;
+}
+
+// ─── Dark mode CSS variables ──────────────────────────────────────────────────
+body.dark-theme {
+  --scout-bg: #0f172a;
+  --scout-surface: #1e293b;
+  --scout-text: #f1f5f9;
+  --scout-text-muted: #94a3b8;
+  --scout-border: #334155;
+
+  color-scheme: dark;
+
+  background-color: var(--scout-bg);
+  color: var(--scout-text);
+
+  // Material overrides for dark mode
+  --mat-sys-background: #0f172a;
+  --mat-sys-surface: #1e293b;
+  --mat-sys-surface-container: #1e293b;
+  --mat-sys-surface-container-high: #263548;
+  --mat-sys-surface-container-highest: #2d3f56;
+  --mat-sys-on-surface: #f1f5f9;
+  --mat-sys-on-surface-variant: #94a3b8;
+  --mat-sys-outline: #334155;
+  --mat-sys-outline-variant: #263548;
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--scout-bg);
+  color: var(--scout-text);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+// ─── Material component resets for themed surfaces ────────────────────────────
+.mat-mdc-form-field .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-notched-outline__trailing {
+  border-color: var(--scout-border) !important;
+}
+
+.mat-mdc-select-value,
+.mat-mdc-form-field-label,
+.mdc-floating-label {
+  color: var(--scout-text) !important;
+}
+
+.mat-mdc-select-panel {
+  background: var(--scout-surface) !important;
+}
+
+.mat-mdc-option {
+  color: var(--scout-text) !important;
+
+  &:hover,
+  &.mat-mdc-option-active {
+    background: rgba(232, 130, 154, 0.08) !important;
+  }
+}
+
+.mat-mdc-paginator {
+  background: var(--scout-surface) !important;
+  color: var(--scout-text) !important;
+  border-top: 1px solid var(--scout-border);
+}
+
+.mat-mdc-paginator-icon {
+  fill: var(--scout-text-muted) !important;
+}
+
+// Sort header arrows
+.mat-sort-header-arrow {
+  color: var(--scout-pink) !important;
+}
+
+// Spinner colour
+.mat-mdc-progress-spinner circle {
+  stroke: var(--scout-pink) !important;
+}
+
+// Global typography tweaks
+* { box-sizing: border-box; }
+
+h1, h2, h3, h4 { color: var(--scout-text); }

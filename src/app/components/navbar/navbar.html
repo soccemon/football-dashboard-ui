@@ -1,0 +1,16 @@
+<mat-toolbar class="navbar">
+  <div class="brand">
+    <mat-icon class="brand-icon">sports_soccer</mat-icon>
+    <span class="brand-name">Scout</span>
+  </div>
+  <span class="spacer"></span>
+  <button
+    mat-icon-button
+    class="theme-btn"
+    (click)="theme.toggle()"
+    [matTooltip]="theme.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+    aria-label="Toggle dark mode"
+  >
+    <mat-icon>{{ theme.isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+</mat-toolbar>

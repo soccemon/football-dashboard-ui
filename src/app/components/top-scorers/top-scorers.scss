@@ -1,0 +1,126 @@
+.scorers-card {
+  background: var(--scout-surface);
+  border: 1px solid var(--scout-border);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--scout-border);
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--scout-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .trophy-icon {
+    color: #f59e0b;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.center-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  gap: 10px;
+  color: var(--scout-text-muted);
+
+  &.empty mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    opacity: 0.35;
+  }
+
+  p { margin: 0; font-size: 0.875rem; text-align: center; }
+}
+
+.scorers-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  flex: 1;
+}
+
+.scorer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--scout-border);
+  transition: background 0.1s ease;
+
+  &:last-child { border-bottom: none; }
+
+  &:hover { background: rgba(232, 130, 154, 0.05); }
+
+  &.top-three .scorer-name { font-weight: 700; }
+}
+
+.rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: var(--scout-border);
+  color: var(--scout-text-muted);
+
+  &.rank-1 { background: #fbbf24; color: #1a1a1a; }
+  &.rank-2 { background: #9ca3af; color: #fff; }
+  &.rank-3 { background: #cd7c3c; color: #fff; }
+}
+
+.scorer-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  .scorer-name {
+    font-size: 0.875rem;
+    color: var(--scout-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .scorer-club {
+    font-size: 0.75rem;
+    color: var(--scout-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.goals-pill {
+  background: linear-gradient(135deg, var(--scout-pink), var(--scout-pink-light));
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}

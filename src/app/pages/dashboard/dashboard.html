@@ -1,0 +1,36 @@
+<div class="dashboard">
+  <!-- Filter Bar -->
+  <section class="section filter-section">
+    <app-filter-bar (filterChange)="onFilterChange($event)" />
+  </section>
+
+  <!-- Error Banner -->
+  @if (playerError()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ playerError() }}</span>
+    </div>
+  }
+
+  <!-- Stats + Top Scorers Row -->
+  <section class="section stats-row">
+    <div class="kpi-col">
+      <app-kpi-row [players]="filteredPlayers()" />
+    </div>
+    <div class="scorers-col">
+      <app-top-scorers
+        [topScorers]="topScorers()"
+        [loading]="loadingTopScorers()"
+      />
+    </div>
+  </section>
+
+  <!-- Player Table -->
+  <section class="section">
+    <app-player-table
+      [players]="filteredPlayers()"
+      [loading]="loadingPlayers()"
+      [emptyMessage]="emptyMessage()"
+    />
+  </section>
+</div>

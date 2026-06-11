@@ -1,0 +1,55 @@
+.dashboard {
+  padding: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  width: 100%;
+}
+
+.filter-section {
+  background: var(--scout-surface);
+  border: 1px solid var(--scout-border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: #dc2626;
+  font-size: 0.9rem;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.scorers-col {
+  min-height: 320px;
+}

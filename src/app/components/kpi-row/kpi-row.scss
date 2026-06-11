@@ -1,0 +1,67 @@
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-card {
+  background: var(--scout-surface);
+  border: 1px solid var(--scout-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.kpi-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  &.icon-players { background: rgba(232, 130, 154, 0.15); color: var(--scout-pink); }
+  &.icon-goals   { background: rgba(232, 130, 154, 0.15); color: var(--scout-pink); }
+  &.icon-assists { background: rgba(242, 167, 187, 0.2);  color: var(--scout-pink-light); }
+  &.icon-rating  { background: rgba(255, 193, 7, 0.15);   color: #f59e0b; }
+}
+
+.kpi-body {
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--scout-text);
+    line-height: 1;
+  }
+
+  .kpi-label {
+    font-size: 0.8rem;
+    color: var(--scout-text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}

@@ -1,0 +1,30 @@
+<div class="scorers-card">
+  <div class="card-header">
+    <mat-icon class="trophy-icon">emoji_events</mat-icon>
+    <h3>Top Scorers</h3>
+  </div>
+
+  @if (loading()) {
+    <div class="center-content">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (topScorers().length === 0) {
+    <div class="center-content empty">
+      <mat-icon>bar_chart</mat-icon>
+      <p>Select a league &amp; season</p>
+    </div>
+  } @else {
+    <ol class="scorers-list">
+      @for (scorer of topScorers(); track scorer.name; let i = $index) {
+        <li class="scorer-item" [class.top-three]="i < 3">
+          <span class="rank rank-{{ i + 1 }}">{{ i + 1 }}</span>
+          <div class="scorer-info">
+            <span class="scorer-name">{{ scorer.name }}</span>
+            <span class="scorer-club">{{ scorer.club }}</span>
+          </div>
+          <span class="goals-pill">{{ scorer.goals }}</span>
+        </li>
+      }
+    </ol>
+  }
+</div>

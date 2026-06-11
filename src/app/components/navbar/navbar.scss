@@ -1,0 +1,42 @@
+.navbar {
+  background: var(--scout-surface) !important;
+  color: var(--scout-text) !important;
+  border-bottom: 2px solid var(--scout-pink-light);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    color: var(--scout-pink);
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--scout-text);
+    background: linear-gradient(135deg, var(--scout-pink), var(--scout-pink-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .theme-btn {
+    color: var(--scout-text) !important;
+  }
+}

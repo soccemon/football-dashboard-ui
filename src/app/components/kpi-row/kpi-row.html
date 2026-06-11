@@ -1,0 +1,41 @@
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-icon-wrap icon-players">
+      <mat-icon>groups</mat-icon>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ total() }}</div>
+      <div class="kpi-label">Total Players</div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon-wrap icon-goals">
+      <mat-icon>sports_soccer</mat-icon>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ avgGoals() | number: '1.2-2' }}</div>
+      <div class="kpi-label">Avg Goals</div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon-wrap icon-assists">
+      <mat-icon>electric_bolt</mat-icon>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ avgAssists() | number: '1.2-2' }}</div>
+      <div class="kpi-label">Avg Assists</div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon-wrap icon-rating">
+      <mat-icon>star</mat-icon>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ avgRating() | number: '1.1-2' }}</div>
+      <div class="kpi-label">Avg Rating</div>
+    </div>
+  </div>
+</div>
