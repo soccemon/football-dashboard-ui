@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://REPLACE_WITH_DEPLOYED_BACKEND_URL',
+  apiUrl: 'https://football-dashboard-api-kzi3.onrender.com',
 };
