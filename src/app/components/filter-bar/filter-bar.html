@@ -9,12 +9,11 @@
     </mat-select>
   </mat-form-field>
 
-  <!-- League (multi-select) -->
+  <!-- League -->
   <mat-form-field appearance="outline" class="filter-field">
     <mat-label>League</mat-label>
     <mat-select
-      multiple
-      [value]="selectedLeagueIds"
+      [value]="selectedLeagueId"
       [disabled]="!selectedSeason"
       (selectionChange)="onLeagueChange($event.value)"
     >
@@ -33,7 +32,7 @@
     <mat-select
       multiple
       [value]="selectedTeamIds"
-      [disabled]="!selectedLeagueIds.length"
+      [disabled]="!selectedLeagueId"
       (selectionChange)="onTeamChange($event.value)"
     >
       @if (loadingTeams) {

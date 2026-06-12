@@ -54,7 +54,7 @@ src/
 
 All filters (league, team, position) and top scorers are derived from the fully loaded player set — no `/top-scorers` endpoint is called separately.
 
-Selecting a league with no team chosen automatically loads players for all teams in that league. Multi-league selection is supported; the team dropdown shows teams from all selected leagues combined.
+A league and at least one team must both be selected before players are fetched — selecting a league alone only populates the team dropdown. League is single-select; team remains multi-select (multiple teams from the same league can be loaded simultaneously via `forkJoin`).
 
 ### Filtering & pagination
 
@@ -81,4 +81,7 @@ All colours are driven by CSS custom properties (`--scout-bg`, `--scout-surface`
 Angular 22's `*ngFor` inside `mat-select` throws `NG0900` when the iterable comes from a signal call. The fix is `ChangeDetectionStrategy.OnPush` + plain arrays + `ChangeDetectorRef.markForCheck()`. Other components use signals normally.
 
 **FilterBar re-emits after teams load.**
-`loadTeams()` calls `emit()` on completion so the dashboard receives the `availableTeams` list and can immediately fetch players without requiring the user to pick a team.
+`loadTeams()` calls `emit()` on completion so the dashboard receives the updated `availableTeams` list and can show the "Select a team" prompt without the user having to interact again.
+
+**Favicon is a data URI.**
+The pink soccer ball favicon is embedded directly in `src/index.html` as a `data:image/svg+xml` URI rather than a separate file. This avoids browser caching and asset-serving issues with the Angular dev server. `public/favicon.svg` also exists as a standalone copy but is not referenced by the HTML.

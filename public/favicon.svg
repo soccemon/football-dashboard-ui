@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <clipPath id="b"><circle cx="16" cy="16" r="14"/></clipPath>
+  </defs>
+  <!-- Pink ball -->
+  <circle cx="16" cy="16" r="14" fill="#E8829A"/>
+  <!-- White seam lines clipped to the ball circle -->
+  <g clip-path="url(#b)" fill="none" stroke="white" stroke-width="1.6" stroke-linejoin="round">
+    <!-- Centre pentagon (circumradius 5.5, vertices at 0°/72°/144°/216°/288° from north) -->
+    <polygon points="16,10.5 21.2,14.3 19.2,20.5 12.8,20.5 10.8,14.3"/>
+    <!-- Seam lines from each vertex to ball edge -->
+    <line x1="16"   y1="10.5" x2="16"  y2="-4"/>
+    <line x1="21.2" y1="14.3" x2="42"  y2="8"/>
+    <line x1="19.2" y1="20.5" x2="33"  y2="40"/>
+    <line x1="12.8" y1="20.5" x2="-1"  y2="40"/>
+    <line x1="10.8" y1="14.3" x2="-10" y2="8"/>
+  </g>
+  <!-- Ball outline -->
+  <circle cx="16" cy="16" r="14" fill="none" stroke="#c96080" stroke-width="1.5"/>
+</svg>

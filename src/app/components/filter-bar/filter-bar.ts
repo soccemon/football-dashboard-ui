@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../services/api.service';
 import { League, Team, FilterState } from '../../models/models';
-import { forkJoin, of } from 'rxjs';
 
 // OnPush + plain arrays: Angular 22 signals inside mat-select throw NG0900; plain arrays + markForCheck() is the fix
 @Component({
@@ -32,11 +31,9 @@ export class FilterBarComponent implements OnInit {
   loadingTeams = false;
 
   selectedSeason: number | null = null;
-  selectedLeagueIds: number[] = [];
+  selectedLeagueId: number | null = null;
   selectedTeamIds: number[] = [];
   selectedPosition = 'All';
-
-  private teamLeagueMap: Record<number, number> = {};
 
   constructor() {
     // Re-run whenever mockMode flips so switching demo on/off reloads the league list
@@ -51,21 +48,19 @@ export class FilterBarComponent implements OnInit {
 
   onSeasonChange(season: number): void {
     this.selectedSeason = season;
-    this.selectedLeagueIds = [];
+    this.selectedLeagueId = null;
     this.selectedTeamIds = [];
     this.teams = [];
-    this.teamLeagueMap = {};
     this.emit();
   }
 
-  onLeagueChange(leagueIds: number[]): void {
-    this.selectedLeagueIds = leagueIds;
+  onLeagueChange(leagueId: number | null): void {
+    this.selectedLeagueId = leagueId;
     this.selectedTeamIds = [];
     this.teams = [];
-    this.teamLeagueMap = {};
 
-    if (leagueIds.length && this.selectedSeason) {
-      this.loadTeams(leagueIds, this.selectedSeason);
+    if (leagueId && this.selectedSeason) {
+      this.loadTeams(leagueId, this.selectedSeason);
     }
     this.emit();
   }
@@ -82,17 +77,16 @@ export class FilterBarComponent implements OnInit {
 
   clearFilters(): void {
     this.selectedSeason = null;
-    this.selectedLeagueIds = [];
+    this.selectedLeagueId = null;
     this.selectedTeamIds = [];
     this.selectedPosition = 'All';
     this.teams = [];
-    this.teamLeagueMap = {};
     this.cdr.markForCheck();
     this.emit();
   }
 
   hasActiveFilters(): boolean {
-    return this.selectedSeason !== null || this.selectedLeagueIds.length > 0 || this.selectedPosition !== 'All';
+    return this.selectedSeason !== null || this.selectedLeagueId !== null || this.selectedPosition !== 'All';
   }
 
   private loadLeagues(): void {
@@ -114,25 +108,15 @@ export class FilterBarComponent implements OnInit {
     });
   }
 
-  private loadTeams(leagueIds: number[], season: number): void {
+  private loadTeams(leagueId: number, season: number): void {
     this.loadingTeams = true;
     this.cdr.markForCheck();
-    const requests = leagueIds.map(id => this.api.getTeams(id, season));
-    forkJoin(requests.length ? requests : [of([])]).subscribe({
-      next: results => {
-        const map: Record<number, number> = {};
-        const merged: Team[] = [];
-        results.forEach((teamList, idx) => {
-          teamList.forEach(team => {
-            map[team.id] = leagueIds[idx];
-            merged.push(team);
-          });
-        });
-        this.teamLeagueMap = map;
-        this.teams = merged;
+    this.api.getTeams(leagueId, season).subscribe({
+      next: teamList => {
+        this.teams = teamList;
         this.loadingTeams = false;
         this.cdr.markForCheck();
-        this.emit(); // lets dashboard fetch all-team players without requiring the user to pick a team
+        this.emit(); // updates dashboard with availableTeams so it can show "Select a team" guidance
       },
       error: err => {
         this.teams = [];
@@ -147,9 +131,9 @@ export class FilterBarComponent implements OnInit {
   private emit(): void {
     this.filterChange.emit({
       season: this.selectedSeason,
-      leagueIds: this.selectedLeagueIds,
+      leagueIds: this.selectedLeagueId ? [this.selectedLeagueId] : [],
       teamIds: this.selectedTeamIds,
-      teamLeagueMap: { ...this.teamLeagueMap },
+      teamLeagueMap: {},
       availableTeams: [...this.teams],
       position: this.selectedPosition,
     });

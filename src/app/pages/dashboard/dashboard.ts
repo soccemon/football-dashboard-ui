@@ -50,9 +50,10 @@ export class DashboardComponent {
   );
 
   emptyMessage = computed(() => {
-    const { season, leagueIds } = this.filterState();
+    const { season, leagueIds, teamIds } = this.filterState();
     if (!season) return 'Select a season to get started.';
     if (!leagueIds.length) return 'Select a league to continue.';
+    if (!teamIds.length) return 'Select a team to load players.';
     return 'No players found for the selected filters.';
   });
 
@@ -73,17 +74,12 @@ export class DashboardComponent {
   }
 
   onFilterChange(filter: FilterState): void {
-    // No specific team selected → treat as "all teams in the league"
-    const effectiveTeamIds = filter.teamIds.length > 0
-      ? filter.teamIds
-      : filter.availableTeams.map(t => t.id);
-
-    const apiKey = `${filter.leagueIds.join(',')}-${filter.season}-${[...effectiveTeamIds].sort().join(',')}`;
+    const apiKey = `${filter.leagueIds.join(',')}-${filter.season}-${[...filter.teamIds].sort().join(',')}`;
     const changed = apiKey !== this.prevApiKey;
 
     this.filterState.set(filter);
 
-    if (!filter.leagueIds.length || !filter.season) {
+    if (!filter.leagueIds.length || !filter.season || !filter.teamIds.length) {
       this.prevApiKey = '';
       this.allPlayers.set([]);
       return;
@@ -91,12 +87,7 @@ export class DashboardComponent {
 
     if (changed) {
       this.prevApiKey = apiKey;
-
-      if (effectiveTeamIds.length) {
-        this.fetchPlayers(filter, effectiveTeamIds);
-      } else {
-        this.allPlayers.set([]);
-      }
+      this.fetchPlayers(filter, filter.teamIds);
     }
   }
 
