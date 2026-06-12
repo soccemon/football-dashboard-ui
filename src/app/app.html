@@ -1,4 +1,15 @@
-<app-navbar />
-<main>
-  <router-outlet />
-</main>
+@if (backendReady()) {
+  <app-navbar />
+  <main>
+    <router-outlet />
+  </main>
+} @else {
+  <div class="startup-screen">
+    <div class="startup-card">
+      <div class="startup-logo">⚽</div>
+      <h1>Scout</h1>
+      <mat-spinner diameter="40" />
+      <p class="startup-message">Waking up the server, this may take up to a minute on first load…</p>
+    </div>
+  </div>
+}
